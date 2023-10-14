@@ -2,6 +2,7 @@ from itertools import product
 
 def calculate_inverse_SOP(minterms, variables):
     num_vars = len(variables)
+    
     all_values = list(range(2 ** num_vars))
     # Remove values that are in minterms to get maxterms
     remaining_values = [value for value in all_values if value not in minterms]

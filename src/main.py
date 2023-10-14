@@ -1,7 +1,6 @@
 from itertools import product
-from sympy.logic.boolalg import Or, And
 from sympy.logic.inference import satisfiable
-from sympy.logic.boolalg import to_cnf
+from sympy.logic.boolalg import to_cnf, to_dnf
 from sympy.logic.boolalg import simplify_logic
 from sympy.abc import symbols
 
@@ -9,25 +8,29 @@ def perform_main_option_1(choice):
     print(f"You chose option 1, command {choice}. Performing function for Boolean Algebraic Function - MIN SOP.")
     minT = input("Enter the Sum of Product Terms separated by a space: ")
     v_in = input("Enter input variables separated by a space (Do NOT use 'E', 'I' as an input): ")   
-     
+    mT = list(map(int, minT.split()))
+    vars = v_in.split()
+    
+    #calculates minterms, masxterms, Canonical SOP and Canonical POS
+    minterms, CSOP, maxterms, CPOS = generate_term(mT, vars)
+    
     if choice == 1: 
-        minterms, CSOP = generate_minterms(list(map(int, minT.split())), v_in.split())
         print("Canonical SOP: (",  CSOP)
 
     elif choice == 2: 
-        print("Canonical POS expression: (", minterms_to_pos_expression(list(map(int, minT.split())), v_in.split()), ")")
+        print("Canonical POS expression: ", CPOS )
     
     elif choice == 3:
-        print("Inverse as a Canonical SOP: (", calculate_inverse_SOP(list(map(int, minT.split())), v_in.split()), ")")
+        print("Inverse as a Canonical SOP: (", calculate_inverse_SOP(mT, vars), ")")
 
     elif choice == 4: 
-        print("Inverse as a Canonical POS: (", calculate_inverse_POS(list(map(int, minT.split())), v_in.split()), ")")
+        print("Inverse as a Canonical POS: (", calculate_inverse_POS(mT, vars), ")")
 
     elif choice == 5: 
-        minterms, CSOP = generate_minterms(list(map(int, minT.split())), v_in.split())
-        print("Reduced Literals as SOP: ", simplify_logic(CSOP))
-    #elif choice == 6: 
-    
+        print("Reduced Literals as SOP: ", to_dnf(CSOP, simplify=True))
+    elif choice == 6: 
+        print("Reduced Literals as POS: ", simplify_logic(CSOP))
+
     #elif choice == 7: 
     
     #elif choice == 8:
@@ -67,11 +70,13 @@ def perform_main_option_2(choice):
     
     #else:
         
-##bool 
-def generate_minterms(minterms, variables):
+##functions:  
+def generate_term(minterms, variables):
+    num_vars = len(variables)
+    #calculate Minterms
     minterms = sorted(set(minterms))
     expressions = []
-
+    
     for minterm in minterms:
         binary_minterm = format(minterm, '0b').zfill(len(variables))
         expression = ""
@@ -82,36 +87,29 @@ def generate_minterms(minterms, variables):
                 expression += f"{variables[i]} & "
         expressions.append(expression[:-2])
     
-    return expressions, (" | ".join(expressions))
-
-def minterms_to_pos_expression(minterms, variables):
-    # Sort and remove duplicates from the list of minterms
-    num_vars = len(variables)
+    #maxterms
     all_values = list(range(2 ** num_vars - 1, -1 , -1))
-    # Remove values that are in minterms to get maxterms
     remaining_values = [value for value in all_values if value not in minterms]
-    expressions = []
+    maxterms = []
+    
     # Convert each maxterm to a boolean expression
-    for maxterm in remaining_values:
-        # Convert the maxter, to binary and pad with zeros to match the number of variables
-        binary_maxterm = format(maxterm, '0b').zfill(num_vars)
+    for maxT in remaining_values:
+        binary_maxterm = format(maxT, '0b').zfill(num_vars)
 
         # Create a boolean expression for the minterm
-        expression = ""
+        maxterm = ""
         for i, bit in enumerate(binary_maxterm):
             if bit == '0':
-                expression += f"{variables[i]} + "
+                maxterm += f"{variables[i]} + "
             elif bit == '1':
-                expression += f"~{variables[i]} + "
+                maxterm += f"~{variables[i]} + "
 
         # Remove the trailing "|"
-        expressions.append(expression[:-2])
+        maxterms.append(maxterm[:-2])
+    
+    return expressions, ("  |  ".join(expressions)) , maxterms , ( "  &  ".join(maxterms))
 
-    # Combine the boolean expressions using AND operations
-    product_of_sums = ") & ( ".join(expressions)
-
-    return product_of_sums
-
+##inverse calcs
 def calculate_inverse_SOP(minterms, variables):
     num_vars = len(variables)
     all_values = list(range(2 ** num_vars))
