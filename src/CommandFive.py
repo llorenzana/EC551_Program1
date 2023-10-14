@@ -1,27 +1,9 @@
-from sympy.logic.boolalg import Or, And
-from sympy.logic.inference import satisfiable
-from sympy.logic.boolalg import to_cnf, simplify_logic
-from sympy.abc import symbols
 from itertools import product
+from sympy.logic.boolalg import Or, And, Not
+from sympy import symbols, parse_expr, to_cnf, simplify_logic
 
 
 def generate_minterms(minterms, variables):
-    minterms = []
-
-    num_variables = len(variables)
-    truth_values = list(product([0, 1], repeat=num_variables))
-
-    for values in truth_values:
-        assignment = dict(zip(self.variables, values))
-        result = eval(self.expression, assignment)
-
-        if result == 1:
-            minterm = ''.join(str(value) for value in values)
-            minterms.append(minterm)
-
-    return minterms
-    
-def minterms_to_expression(minterms, variables):
     minterms = sorted(set(minterms))
     expressions = []
 
@@ -34,31 +16,13 @@ def minterms_to_expression(minterms, variables):
             elif bit == '1':
                 expression += f"{variables[i]} & "
         expressions.append(expression[:-2])
+    
+    return expressions, (" | ".join(expressions))
 
-    return " | ".join(expressions)
+minT = input("Enter the Sum of Product Terms separated by a space: ")
+v_in = input("Enter input variables separated by a space (Do NOT use 'E', 'I' as an input): ")
 
-def reduced_minterms(minterms):
-    sop_expression = simplify_logic(to_cnf(minterms))
-    return simplify_logic(to_cnf(minterms))
+minterms, expand_minT= generate_minterms(list(map(int, minT.split())), v_in.split())
+print("complete: ", simplify_logic(expand_minT))
 
-def main():
-    mint = input("Enter the Sum of Product Terms: ")
-    v_in = input("Enter input variables separated by a space: ")
-
-    try:
-        minterms = list(map(int, mint.split()))
-        variables = v_in.split()
-
-        if not all(isinstance(m, int) for m in minterms):
-            raise ValueError("Minterms must be integers.")
-        
-        test = minterms_to_expression(minterms, variables)
-        result = reduced_minterms(test)
-
-        print("Canonical SOP: ", result)
-
-    except ValueError as e:
-        print(f"Error: {e}")
-
-if __name__ == "__main__":
-    main()
+# Usage:

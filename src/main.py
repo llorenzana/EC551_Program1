@@ -8,10 +8,10 @@ from sympy.abc import symbols
 def perform_main_option_1(choice):
     print(f"You chose option 1, command {choice}. Performing function for Boolean Algebraic Function - MIN SOP.")
     minT = input("Enter the Sum of Product Terms separated by a space: ")
-    v_in = input("Enter input variables separated by a space (Do NOT use 'E' as an input): ")
-    minterms, CSOP = generate_minterms(list(map(int, minT.split())), v_in.split())
-    
+    v_in = input("Enter input variables separated by a space (Do NOT use 'E', 'I' as an input): ")   
+     
     if choice == 1: 
+        minterms, CSOP = generate_minterms(list(map(int, minT.split())), v_in.split())
         print("Canonical SOP: (",  CSOP)
 
     elif choice == 2: 
@@ -24,7 +24,8 @@ def perform_main_option_1(choice):
         print("Inverse as a Canonical POS: (", calculate_inverse_POS(list(map(int, minT.split())), v_in.split()), ")")
 
     elif choice == 5: 
-        print("Reduced Literals as SOP: ", reduced_minterms(CSOP))
+        minterms, CSOP = generate_minterms(list(map(int, minT.split())), v_in.split())
+        print("Reduced Literals as SOP: ", simplify_logic(CSOP))
     #elif choice == 6: 
     
     #elif choice == 7: 
@@ -162,9 +163,6 @@ def calculate_inverse_POS(minterms, variables):
     # Combine the boolean expressions using AND operations
     inverse_POS = ") & ( ".join(expressions)
     return inverse_POS
-
-def reduced_minterms(minterms):
-    return simplify_logic(to_cnf(minterms))
 
 #Command Line Experience
 def main():
