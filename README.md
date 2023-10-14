@@ -5,14 +5,15 @@
 [Overview](#Overview)  
 [Organization](#Organization)  
 [Functions](#Functions)  
-...snip...    
+[References](#References)  
 
-<a name="Overview"/>
 ### Overview
 
 
-<a name="Organization"/>
 ### Organization
 
-<a name="Organization"/>
-### Functions
+
+### Functions  
+
+### References  
+BLIF parsing: https://github.com/IamFlea/BLIF-to-truth-table/blob/master/blif_to_tt.py
