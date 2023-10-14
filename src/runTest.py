@@ -1,4 +1,9 @@
 from itertools import product
+from sympy.logic.boolalg import Or, And
+from sympy.logic.inference import satisfiable
+from sympy.logic.boolalg import to_cnf
+from sympy.logic.boolalg import simplify_logic
+from sympy.abc import symbols
 
 def perform_main_option_1(choice):
     print(f"You chose option 1, command {choice}. Performing function for Boolean Algebraic Function - MIN SOP.")
@@ -17,8 +22,8 @@ def perform_main_option_1(choice):
     elif choice == 4: 
         print("Inverse as a Canonical POS: (", calculate_inverse_POS(list(map(int, minT.split())), v_in.split()), ")")
 
-    #elif choice == 5: 
-    
+    elif choice == 5: 
+        print("Reduced Literals as SOP: ", reduced_minterms(minterms_to_expression(list(map(int, minT.split())), v_in.split())))
     #elif choice == 6: 
     
     #elif choice == 7: 
@@ -77,15 +82,15 @@ def minterms_to_expression(minterms, variables):
         expression = ""
         for i, bit in enumerate(binary_minterm):
             if bit == '0':
-                expression += f"~{variables[i]}  "
+                expression += f"~{variables[i]} & "
             elif bit == '1':
-                expression += f"{variables[i]}  "
+                expression += f"{variables[i]} & "
 
         # Remove the trailing "&" and add the expression to the list
         expressions.append(expression[:-2])
 
     # Combine the boolean expressions using OR operations
-    sum_of_minterms = " + ".join(expressions)
+    sum_of_minterms = " | ".join(expressions)
 
     return sum_of_minterms
 
@@ -169,18 +174,21 @@ def calculate_inverse_POS(minterms, variables):
     inverse_POS = ") & ( ".join(expressions)
     return inverse_POS
 
+def reduced_minterms(minterms):
+    return simplify_logic(to_cnf(minterms))
+
 #Command Line Experience
 def main():
     while True:
         print("Input Options:")
         print("1. Boolean Algebraic Function - MIN SOP")
         print("2. Digital Combination Logic Circuit" )
-        print("0. Exit")
+        print("0. Exit \n")
 
         main_choice = int(input("Enter your input choice: "))
 
         if main_choice == 0:
-            print("Exiting the program. Goodbye!")
+            print("Thanks for using our program. Goodbye!")
             break
         
         
@@ -197,7 +205,7 @@ def main():
             print("9. # of ON-Set Minterms")
             print("10. # Of ON-Set Maxterms ")
             print("11. ")
-            print("12. ")
+            print("12. \n")
 
             command = int(input("Enter your command: "))
 
@@ -213,7 +221,7 @@ def main():
 
         another_command = input("Do you want to perform another command? (yes/no): ")
         if another_command.lower() != 'yes':
-            print("Thank's for using our program. Goodbye!")
+            print("Thanks for using our program. Goodbye!")
             break
 
 if __name__ == "__main__":
