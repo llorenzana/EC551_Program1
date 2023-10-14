@@ -33,8 +33,18 @@ def main():
 
     # Get the truth table for the selected file
     filename = "blif/" + files[choice]
-    output = files[choice] + ".text"
-    blif_file_to_tt_file(filename, output)
+    outputFilename = files[choice] + ".text"
+    blif_file_to_tt_file(filename, outputFilename)
+
+    # PARSE the output file
+    # Open a file in read mode ('r')
+    with open(outputFilename, 'r') as file:
+        for line in file:
+            # if ()
+            print(line, end='')
+
+    #Clean up files
+    # os.remove(outputFilename)
 
 if __name__ == "__main__":
     main()
