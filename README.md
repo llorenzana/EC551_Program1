@@ -1,2 +1,2 @@
-# EC551_Program1
-Program Assignment 1
+# EC551 Program 1
+### Leanorine Lorenzana-Garcia & Cole Wentzel
