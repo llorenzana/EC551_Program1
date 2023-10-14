@@ -8,10 +8,11 @@ from sympy.abc import symbols
 def perform_main_option_1(choice):
     print(f"You chose option 1, command {choice}. Performing function for Boolean Algebraic Function - MIN SOP.")
     minT = input("Enter the Sum of Product Terms separated by a space: ")
-    v_in = input("Enter input variables separated by a space: ")
+    v_in = input("Enter input variables separated by a space (Do NOT use 'E' as an input): ")
+    minterms, CSOP = generate_minterms(list(map(int, minT.split())), v_in.split())
     
     if choice == 1: 
-        print("Canonical SOP: ", minterms_to_expression(list(map(int, minT.split())), v_in.split()))
+        print("Canonical SOP: (",  CSOP)
 
     elif choice == 2: 
         print("Canonical POS expression: (", minterms_to_pos_expression(list(map(int, minT.split())), v_in.split()), ")")
@@ -23,7 +24,7 @@ def perform_main_option_1(choice):
         print("Inverse as a Canonical POS: (", calculate_inverse_POS(list(map(int, minT.split())), v_in.split()), ")")
 
     elif choice == 5: 
-        print("Reduced Literals as SOP: ", reduced_minterms(minterms_to_expression(list(map(int, minT.split())), v_in.split())))
+        print("Reduced Literals as SOP: ", reduced_minterms(CSOP))
     #elif choice == 6: 
     
     #elif choice == 7: 
@@ -66,33 +67,21 @@ def perform_main_option_2(choice):
     #else:
         
 ##bool 
-def minterms_to_expression(minterms, variables):
-    # Sort and remove duplicates from the list of minterms
+def generate_minterms(minterms, variables):
     minterms = sorted(set(minterms))
-
-    # Initialize an empty list to store boolean expressions for each minterm
     expressions = []
 
-    # Convert each minterm to a boolean expression
     for minterm in minterms:
-        # Convert the minterm to binary and pad with zeros to match the number of variables
         binary_minterm = format(minterm, '0b').zfill(len(variables))
-
-        # Create a boolean expression for the minterm
         expression = ""
         for i, bit in enumerate(binary_minterm):
             if bit == '0':
                 expression += f"~{variables[i]} & "
             elif bit == '1':
                 expression += f"{variables[i]} & "
-
-        # Remove the trailing "&" and add the expression to the list
         expressions.append(expression[:-2])
-
-    # Combine the boolean expressions using OR operations
-    sum_of_minterms = " | ".join(expressions)
-
-    return sum_of_minterms
+    
+    return expressions, (" | ".join(expressions))
 
 def minterms_to_pos_expression(minterms, variables):
     # Sort and remove duplicates from the list of minterms
