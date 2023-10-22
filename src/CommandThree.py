@@ -1,33 +1,100 @@
 from itertools import product
+from sympy.logic.boolalg import Or, And, Not
+from sympy import symbols, parse_expr, to_cnf, simplify_logic
 
-def calculate_inverse_SOP(minterms, variables):
-    num_vars = len(variables)
+class BooleanFunction:
+    def __init__(self, expression, variables):
+        self.expression = expression
+        self.variables = variables
+
+    def generateTerms(self):
+        minterms = []
+        maxterms = []
+
+        num_variables = len(self.variables)
+        truth_values = list(product([0, 1], repeat=num_variables))
+
+        for values in truth_values:
+            assignment = dict(zip(self.variables, values))
+            result = eval(self.expression, assignment)
+
+            if result == 1:
+                minterm = ''.join(str(value) for value in values)
+                minterms.append(minterm)
+                
+            if result == 0:
+                maxterm = ''.join(str(value) for value in values)
+                maxterms.append(maxterm)
     
-    all_values = list(range(2 ** num_vars))
-    # Remove values that are in minterms to get maxterms
-    remaining_values = [value for value in all_values if value not in minterms]
-    expressions = []
-    # Convert each maxterm to a boolean expression
-    for minterm in remaining_values:
-        # Convert the maxter, to binary and pad with zeros to match the number of variables
-        binary_maxterm = format(minterm, '0b').zfill(num_vars)
+        # Convert minterms to an expanded sum of minterms
+        expanded_sum_of_minterms = self.expand_minterms(minterms)
+        expanded_product_of_maxterms = self.expand_maxterms(maxterms)
 
-        # Create a boolean expression for the minterm
-        expression = ""
-        for i, bit in enumerate(binary_maxterm):
-            if bit == '0':
-                expression += f"~{variables[i]}  "
-            elif bit == '1':
-                expression += f"{variables[i]}  "
+        return minterms, expanded_sum_of_minterms , maxterms, expanded_product_of_maxterms
 
-        # Remove the trailing "+"
-        expressions.append(expression[:-2])
+    def expand_minterms(self, minterms):
+        expanded_sum_of_minterms = []
 
-    # Combine the boolean expressions using AND operations
-    inverse_SOP = ") + ( ".join(expressions)
-    return inverse_SOP
+        for minterm in minterms:
+            term = ""
+            for i, value in enumerate(minterm):
+                if value == '0':
+                    term += f"~{self.variables[i]}   "
+                elif value == '1':
+                    term += f"{self.variables[i]}   "
+                    
+            # Remove the trailing "&"
+            term = term[:-2]
+            expanded_sum_of_minterms.append(term)
 
-minT = input("Enter the minterms separated by space: ")
+        return " + ".join(expanded_sum_of_minterms)
+
+    def expand_maxterms(self, maxterms):
+        expanded_product_of_maxterms = []
+
+        for maxterm in maxterms:
+            term = ""
+            for i, value in enumerate(maxterm):
+                if value == '0':
+                    term += f"{self.variables[i]} | "
+                elif value == '1':
+                    term += f"~{self.variables[i]} | "
+
+            # Remove the trailing "|"
+            term = term[:-2]
+            expanded_product_of_maxterms.append(term)
+
+        return " & ".join(expanded_product_of_maxterms)
+    
+def calculate_inverse_SOP(maxterms, variables):
+    inverse_SOP = []
+    
+    for maxterm in maxterms:
+        term = ""
+        for i, value in enumerate(maxterm):
+            if value == '0':
+                term += f"~{variables[i]}  "
+            elif value == '1':
+                term += f"{variables[i]}  "
+        
+        term = term[:-2]
+        inverse_SOP.append(term)
+    
+    return ") + ( ".join(inverse_SOP)
+          
+# Example usage:
+print("Welcome: Please select which you would like to do 1 or 2")
+expression = input("Boolean Equation, please use ~ to indicate a NOT: ")
 v_in = input("Enter input variables separated by a space: ")
-inverse_SOP = calculate_inverse_SOP(list(map(int, minT.split())), v_in.split())
-print("Inverse as a Canonical SOP: (", inverse_SOP, ")")
+vars = v_in.split()
+
+boolean_function = BooleanFunction(expression, vars)
+minterms, CSOP, maxterms, CPOS = boolean_function.generateTerms()
+invSOP = boolean_function.calculate_inverse_SOP(maxterms)
+
+
+print("Generated Minterms:", minterms)
+print("Generated Maxterms:", maxterms)
+
+print("Inverse SOP: (", invSOP, ")")
+
