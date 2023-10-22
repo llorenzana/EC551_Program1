@@ -102,11 +102,6 @@ minterms, CSOP, maxterms, CPOS = boolean_function.generateTerms()
 print("Generated Minterms:", minterms)
 print("Generated Maxterms:", maxterms)
 
-prime_implicants = boolean_function.find_prime_implicants()
-essential_prime_implicants = boolean_function.find_essential_prime_implicants(minterms)
-
-print("Prime Implicants:", prime_implicants)
-print("Essential Prime Implicants:", essential_prime_implicants)
 
 
 
