@@ -8,6 +8,9 @@ from blif_to_tt import blif_file_to_tt_file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
+def getMinterms(boolList):
+    return None
+
 def main():
     # Specify the directory path
     folder_path = "blif"
@@ -38,43 +41,38 @@ def main():
     outputFilename = files[choice] + ".text"
     blif_file_to_tt_file(filename, outputFilename)
 
-    # PARSE the output file
-    # Open a file in read mode ('r')
-
     # Declare variables needed for parsing
     outputArray = None
+    mintermArray = None
     numInputs = None
     numOutputs = None
 
+    # Parse the file
     with open(outputFilename, 'r') as file:
-        
         lineNum = 1 # track line number for parsing
-        index = -5 # track the minterm currently being evaluated
+        index = -5 # track the minterm currently being evaluated, start at -5 because first 5 lines are metadata
 
         for line in file:
             # Print out the line for debugging 
-            print(line, end='')
-            
             if lineNum == 2: # Line 2 has number of inputs
                 numInputs = int(line[16:-1])
             elif lineNum == 3: # Line 3 has number of outputs
                 numOutputs = int(line[17:-1])
-                print(numInputs, numOutputs)
                 outputArray = np.zeros((numOutputs, pow(2, numInputs)), dtype=bool) # Each row represents an output, columns represent minterms for that input
+                mintermArray = np.full((numOutputs, pow(2, numInputs)), None, dtype=object) # Will fill with minterms for each output
             elif lineNum >= 6: # Line 3 has number of outputs
                 inputIndex = 0
                 for i in range(numOutputs):
                     if (int(line[9 + i])):
                         outputArray[inputIndex][index] = True
-                        print(inputIndex, index)
-                        print(outputArray[inputIndex][index])
                     inputIndex = inputIndex + 1
-            else:
-                print('We do not care about this line.')
             lineNum = lineNum + 1
             index = index + 1
     
-    print(outputArray)
+    # Use the arrays to get the minterms
+    print(outputArray[0])
+    getMinterms(outputArray)
+
     #Clean up files
     # os.remove(outputFilename)
 
