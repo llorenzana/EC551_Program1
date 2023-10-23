@@ -56,18 +56,19 @@ def main():
             print(line, end='')
             
             if lineNum == 2: # Line 2 has number of inputs
-                numInputs = int(line[-2])
+                numInputs = int(line[16:-1])
             elif lineNum == 3: # Line 3 has number of outputs
-                numOutputs = pow(2, int(line[-2]))
-                outputArray = np.zeros((numInputs, numOutputs), dtype=bool) # Each row represents an input, columns represent minterms for that input
+                numOutputs = int(line[17:-1])
+                print(numInputs, numOutputs)
+                outputArray = np.zeros((numOutputs, pow(2, numInputs)), dtype=bool) # Each row represents an output, columns represent minterms for that input
             elif lineNum >= 6: # Line 3 has number of outputs
                 inputIndex = 0
-                for i in range(numInputs):
+                for i in range(numOutputs):
                     if (int(line[9 + i])):
                         outputArray[inputIndex][index] = True
                         print(inputIndex, index)
                         print(outputArray[inputIndex][index])
-                        inputIndex = inputIndex + 1
+                    inputIndex = inputIndex + 1
             else:
                 print('We do not care about this line.')
             lineNum = lineNum + 1
