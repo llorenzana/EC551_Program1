@@ -58,11 +58,11 @@ def perform_main_option_1(choice):
         print("saved number of literals: ", countLiterals(maxT, str(minPOS) , vars))
 
     elif choice == 7: 
-        PI, _ =  countPI_EPI([int(minterm, 2) for minterm in minT] )
+        PI, _ =  countPI_EPI([int(minterm, 2) for minterm in minT])
         print("Number of Prime Implicants:", len(PI))
         
     elif choice == 8:
-        _, EPI =  countPI_EPI([int(minterm, 2) for minterm in minT] )
+        _, EPI =  countPI_EPI([int(minterm, 2) for minterm in minT])
         print("Number of Essential Prime Implicants:", len(EPI))
 
     elif choice == 9:
