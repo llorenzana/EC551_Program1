@@ -1,5 +1,4 @@
 import os
-import re
 import numpy as np  
 
 from blif_to_tt import blif_file_to_tt_file
@@ -13,6 +12,12 @@ def getMinterms(boolList): # Produces a list of minterms when given a list
     minterms = [i for i, value in enumerate(boolList) if value]
     print(minterms)
     return minterms
+
+def getMaxtermsFromTT(boolList): # Produces a list of minterms when given a list
+    # Create a list of indices where the value is True
+    maxterms = [i for i, value in enumerate(boolList) if ~value]
+    print(maxterms)
+    return maxterms
 
 def main():
     # Specify the directory path
@@ -74,9 +79,10 @@ def main():
     # Use the arrays to get the minterms //TEST
     print(outputArray[7])
     getMinterms(outputArray[7])
+    getMaxtermsFromTT(outputArray[7])
 
     #Clean up files
-    # os.remove(outputFilename)
+    os.remove(outputFilename)
 
 if __name__ == "__main__":
     main()
