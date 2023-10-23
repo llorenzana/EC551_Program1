@@ -1,11 +1,24 @@
 import os
-import numpy as np  
+import re
+import numpy as np
+from itertools import product
 
 from blif_to_tt import blif_file_to_tt_file
 
 # Change the working directory to the directory where your script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
+
+def convertToBinary(decimalArray):
+    size = len(bin(decimalArray[-1]))-2
+    groups = {},set()
+
+    for minterm in decimalArray:
+        try:
+            groups[bin(minterm).count('1')].append(bin(minterm)[2:].zfill(size))
+        except KeyError:
+            groups[bin(minterm).count('1')] = [bin(minterm)[2:].zfill(size)]
+    return groups
 
 def getMinterms(boolList): # Produces a list of minterms when given a list
     # Create a list of indices where the value is True
@@ -77,9 +90,9 @@ def main():
             index = index + 1
     
     # Use the arrays to get the minterms //TEST
-    print(outputArray[7])
-    getMinterms(outputArray[7])
-    getMaxtermsFromTT(outputArray[7])
+    testArray = 1
+    print(outputArray[testArray])
+    print(convertToBinary(mintermArray))
 
     #Clean up files
     os.remove(outputFilename)
