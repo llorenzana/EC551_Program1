@@ -64,21 +64,17 @@ class BooleanFunction:
 
         return " & ".join(expanded_product_of_maxterms)
 
-
 def countPI_EPI(mt):
-
-    def findEPI(x): # Function to find essential prime implicants from prime implicants chart
-        res = []
+    def findEPI(x): #EPI function
+        EPI = []
         for i in x:
-            if len(x[i]) == 1:
-                res.append(x[i][0]) if x[i][0] not in res else None
-        return res
+            if len(x[i]) == 1: ##checks if its is only one --> means its EPI
+                if x[i] not in EPI: ## doesn't append if already there 
+                    EPI.append(x[i]) ## apend value
+        return EPI
 
     def flatten(x): # Flattens a list
-        flattened_items = []
-        for i in x:
-            flattened_items.extend(x[i])
-        return flattened_items
+        return [item for sublist in x.values() for item in sublist]
 
     def findminterms(a): #Function for finding out which minterms are merged. For example, 10-1 is obtained by merging 9(1001) and 11(1011)
         gaps = a.count('-')
@@ -112,7 +108,7 @@ def countPI_EPI(mt):
     minterms = mt
     minterms.sort()
     size = len(bin(minterms[-1]))-2
-    groups,all_pi = {},set()
+    groups, all_pi = {},set()
 
     # Primary grouping starts
     for minterm in minterms:

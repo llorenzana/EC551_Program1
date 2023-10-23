@@ -75,4 +75,3 @@ minterms, _, maxterms, _ = boolean_function.generate_terms()
 
 print("Generated Minterms:", minterms)
 print("Generated Maxterms:", maxterms)
-

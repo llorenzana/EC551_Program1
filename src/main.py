@@ -1,7 +1,6 @@
 import os
 import re
 import numpy as np  
-
 from itertools import product, combinations
 from sympy.logic.boolalg import to_cnf, to_dnf,  simplify_logic
 from sympy.abc import symbols
@@ -331,21 +330,18 @@ def countLiterals(minterms, simplified, variables):
 
 # number of prime implicants & essential prime implicants
 def countPI_EPI(mt):
-
-    def findEPI(x): # Function to find essential prime implicants from prime implicants chart
+    def findEPI(x): #EPI function
         EPI = []
         for i in x:
-            if len(x[i]) == 1:
-                EPI.append(x[i][0]) if x[i][0] not in EPI else None
+            if len(x[i]) == 1: ##checks if its is only one --> means its EPI
+                if x[i] not in EPI: ## doesn't append if already there 
+                    EPI.append(x[i]) ## apend value
         return EPI
 
-    def flatten(x): # Flattens a list
-        flattened_items = []
-        for i in x:
-            flattened_items.extend(x[i])
-        return flattened_items
+    def flatten(x): # Flattens list
+        return [item for sublist in x.values() for item in sublist]
 
-    def findminterms(a): #Function for finding out which minterms are merged. For example, 10-1 is obtained by merging 9(1001) and 11(1011)
+    def findminterms(a): #Function for finding out which minterms are merged
         gaps = a.count('-')
         if gaps == 0:
             return [str(int(a,2))]
@@ -377,7 +373,7 @@ def countPI_EPI(mt):
     minterms = mt
     minterms.sort()
     size = len(bin(minterms[-1]))-2
-    groups,all_pi = {},set()
+    groups, all_pi = {},set()
 
     # Primary grouping starts
     for minterm in minterms:
@@ -409,13 +405,13 @@ def countPI_EPI(mt):
             break        
 
     # Prime Implicant Chart begin
-    sz = len(str(mt[-1])) # The number of digits of the largest minterm
-    chart = {}
+    sz = len(str(mt[-1])) # The number of digits of the largest minterm --> integer 
+    chart = {} # create a chart --> keep track of pi and EPI
+    
     for i in all_pi:
-        merged_minterms,y = findminterms(i),0
+        merged_minterms = findminterms(i)
         for j in merged_minterms:
             x = mt.index(int(j))*(sz+1) # The position where we should put 'X'
-            y = x+sz
             try:
                 chart[j].append(i) if i not in chart[j] else None # Add minterm in chart
             except KeyError:
