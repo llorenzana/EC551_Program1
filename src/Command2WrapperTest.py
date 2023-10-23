@@ -8,8 +8,11 @@ from blif_to_tt import blif_file_to_tt_file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
-def getMinterms(boolList):
-    return None
+def getMinterms(boolList): # Produces a list of minterms when given a list
+    # Create a list of indices where the value is True
+    minterms = [i for i, value in enumerate(boolList) if value]
+    print(minterms)
+    return minterms
 
 def main():
     # Specify the directory path
@@ -43,7 +46,6 @@ def main():
 
     # Declare variables needed for parsing
     outputArray = None
-    mintermArray = None
     numInputs = None
     numOutputs = None
 
@@ -69,9 +71,9 @@ def main():
             lineNum = lineNum + 1
             index = index + 1
     
-    # Use the arrays to get the minterms
-    print(outputArray[0])
-    getMinterms(outputArray)
+    # Use the arrays to get the minterms //TEST
+    print(outputArray[7])
+    getMinterms(outputArray[7])
 
     #Clean up files
     # os.remove(outputFilename)
