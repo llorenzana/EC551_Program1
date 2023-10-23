@@ -38,10 +38,13 @@ def perform_main_option_1(choice):
         print("saved number of literals: ", countLiterals(maxT, str(minPOS) , vars))
 
     elif choice == 7: 
-        print("Number of Prime Implicants: ", count_prime_implicants(CSOP, vars))
+        PI, _ =  countPI_EPI([int(minterm, 2) for minterm in minT] )
+        print("Number of Prime Implicants:", len(PI))
         
     elif choice == 8:
-        print("Number of Essential Prime Implicants: ", count_EPI())
+        _, EPI =  countPI_EPI([int(minterm, 2) for minterm in minT] )
+        print("Number of Essential Prime Implicants:", len(EPI))
+
     elif choice == 9:
         print("Number of ON-Set minterms: ", len(minT))
     elif choice == 10: 
@@ -183,17 +186,101 @@ def countLiterals(minterms, simplified, variables):
     minimizedCount = sum(simplified.count(var) for var in variables)
     return (canonicalCount - minimizedCount)
 
-# number of prime implicants 
-def count_prime_implicants(minterms, variables):
+# number of prime implicants & essential prime implicants
+def countPI_EPI(mt):
 
-    
-    return 
+    def findEPI(x): # Function to find essential prime implicants from prime implicants chart
+        EPI = []
+        for i in x:
+            if len(x[i]) == 1:
+                EPI.append(x[i][0]) if x[i][0] not in EPI else None
+        return EPI
 
+    def flatten(x): # Flattens a list
+        flattened_items = []
+        for i in x:
+            flattened_items.extend(x[i])
+        return flattened_items
 
-#number of essential prime implicants
-def count_EPI (): 
-    
-    return 
+    def findminterms(a): #Function for finding out which minterms are merged. For example, 10-1 is obtained by merging 9(1001) and 11(1011)
+        gaps = a.count('-')
+        if gaps == 0:
+            return [str(int(a,2))]
+        x = [bin(i)[2:].zfill(gaps) for i in range(pow(2,gaps))]
+        temp = []
+        for i in range(pow(2,gaps)):
+            temp2,ind = a[:],-1
+            for j in x[0]:
+                if ind != -1:
+                    ind = ind+temp2[ind+1:].find('-')+1
+                else:
+                    ind = temp2[ind+1:].find('-')
+                temp2 = temp2[:ind]+j+temp2[ind+1:]
+            temp.append(str(int(temp2,2)))
+            x.pop(0)
+        return temp
+
+    def compare(a,b): # Function for checking if 2 minterms differ by 1 bit only
+        c = 0
+        for i in range(len(a)):
+            if a[i] != b[i]:
+                mismatch_index = i
+                c += 1
+                if c>1:
+                    return (False,None)
+        return (True,mismatch_index)
+         
+    mt.sort()
+    minterms = mt
+    minterms.sort()
+    size = len(bin(minterms[-1]))-2
+    groups,all_pi = {},set()
+
+    # Primary grouping starts
+    for minterm in minterms:
+        try:
+            groups[bin(minterm).count('1')].append(bin(minterm)[2:].zfill(size))
+        except KeyError:
+            groups[bin(minterm).count('1')] = [bin(minterm)[2:].zfill(size)]
+
+    while True:
+        tmp = groups.copy()
+        groups,m,marked,should_stop = {},0,set(),True
+        l = sorted(list(tmp.keys()))
+        for i in range(len(l)-1):
+            for j in tmp[l[i]]: # Loop which iterates through current group elements
+                for k in tmp[l[i+1]]: # Loop which iterates through next group elements
+                    res = compare(j,k) # Compare the minterms
+                    if res[0]: # If the minterms differ by 1 bit only
+                        try:
+                            groups[m].append(j[:res[1]]+'-'+j[res[1]+1:]) if j[:res[1]]+'-'+j[res[1]+1:] not in groups[m] else None # Put a '-' in the changing bit and add it to corresponding group
+                        except KeyError:
+                            groups[m] = [j[:res[1]]+'-'+j[res[1]+1:]] # If the group doesn't exist, create the group at first and then put a '-' in the changing bit and add it to the newly created group
+                        should_stop = False
+                        marked.add(j) # Mark element j
+                        marked.add(k) # Mark element k
+            m += 1
+        local_unmarked = set(flatten(tmp)).difference(marked) # Unmarked elements of each table
+        all_pi = all_pi.union(local_unmarked) # Adding Prime Implicants to global list
+        if should_stop: # If the minterms cannot be combined further
+            break        
+
+    # Prime Implicant Chart begin
+    sz = len(str(mt[-1])) # The number of digits of the largest minterm
+    chart = {}
+    for i in all_pi:
+        merged_minterms,y = findminterms(i),0
+        for j in merged_minterms:
+            x = mt.index(int(j))*(sz+1) # The position where we should put 'X'
+            y = x+sz
+            try:
+                chart[j].append(i) if i not in chart[j] else None # Add minterm in chart
+            except KeyError:
+                chart[j] = [i]
+    # Printing and processing of Prime Implicant chart ends
+
+    EPI = findEPI(chart) # Finding essential prime implicants
+    return all_pi, EPI
 
 #Command Line Experience
 def main():
