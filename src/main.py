@@ -11,44 +11,6 @@ from blif_to_tt import blif_file_to_tt_file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
-def generate_term(minterms, variables):
-    num_vars = len(variables)
-    #calculate Minterms
-    minterms = sorted(set(minterms))
-    expressions = []
-    
-    for minterm in minterms:
-        binary_minterm = format(minterm, '0b').zfill(len(variables))
-        expression = ""
-        for i, bit in enumerate(binary_minterm):
-            if bit == '0':
-                expression += f"~{variables[i]} & "
-            elif bit == '1':
-                expression += f"{variables[i]} & "
-        expressions.append(expression[:-2])
-    
-    #maxterms
-    all_values = list(range(2 ** num_vars - 1, -1 , -1))
-    remaining_values = [value for value in all_values if value not in minterms]
-    maxterms = []
-    
-    # Convert each maxterm to a boolean expression
-    for maxT in remaining_values:
-        binary_maxterm = format(maxT, '0b').zfill(num_vars)
-
-        # Create a boolean expression for the minterm
-        maxterm = ""
-        for i, bit in enumerate(binary_maxterm):
-            if bit == '0':
-                maxterm += f"{variables[i]} + "
-            elif bit == '1':
-                maxterm += f"~{variables[i]} + "
-
-        # Remove the trailing "|"
-        maxterms.append(maxterm[:-2])
-    
-    return expressions, ("  |  ".join(expressions)) , maxterms , ( "  &  ".join(maxterms))
-
 def getMintermsFromTT(boolList): # Produces a list of minterms when given a list
     # Create a list of indices where the value is True
     minterms = [i for i, value in enumerate(boolList) if value]
@@ -59,9 +21,21 @@ def getMaxtermsFromTT(boolList): # Produces a list of maxterms when given a list
     maxterms = [i for i, value in enumerate(boolList) if ~value]
     return maxterms
 
-def convertToBinary(decimalArray):
-    binaryArray = [bin(num)[2:] for num in decimalArray]
-    return binaryArray
+def generate_termBLIF(minterms, maxterms, variables):
+    num_vars = len(variables)
+    #calculate Minterms
+    minterms = sorted(set(minterms))
+    binaryMNT = []
+    for minterm in minterms:
+        binary_minterm = format(minterm, '0b').zfill(len(variables))
+        binaryMNT.append(binary_minterm)
+    
+    binaryMXT = []
+    for maxterm in maxterms: 
+        binary_minterm = format(maxterm, '0b').zfill(len(variables))
+        binaryMXT.append(binary_minterm)  
+        
+    return binaryMNT, binaryMXT
 
 def perform_main_option_1(choice):
     print(f"You chose option 1, command {choice}. Performing function for Boolean Algebraic Function - MIN SOP.")
@@ -188,19 +162,36 @@ def perform_main_option_2(choice):
     testIndex = 0 #REMOVE AFTER TEST
     minT = getMintermsFromTT(outputArray[testIndex])
     maxT = getMaxtermsFromTT(outputArray[testIndex])
-    variableArray = outputArray[testIndex]
 
     print(minT)
     print (type(minT))
     print(maxT)
 
-    minterms, expandMin, maxterms, expandMax = generate_term(minT, variableArray)
+    #minterms, expandMin, maxterms, expandMax = generate_term(minT, variableArray)
 
-    if (choice == 1):
-        print("Canonical SOP: \u03A3 m",  [int(minterm, 2) for minterm in minT])
-        #print("canonical SOP: ", expandMin, "")
+    if choice == 1:
+        for index, row in enumerate(variableArray):
+            # Code that repeats for each varaible below
+            minT = getMintermsFromTT(outputArray[index])
+            maxT = getMaxtermsFromTT(outputArray[index])
+            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, variableArray)
 
-    #elif choice == 2: 
+            print(f"{row} minterms:")
+            print("Canonical SOP: \u03A3 m",  [int(minterm, 2) for minterm in binaryMNT])
+            #print("canonical SOP: ", expandMin, "")
+
+    elif choice == 2: 
+        for index, row in enumerate(variableArray):
+            # Code that repeats for each varaible below
+            minT = getMintermsFromTT(outputArray[index])
+            maxT = getMaxtermsFromTT(outputArray[index])
+            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, variableArray)
+
+            print(f"{row} maxterms:")
+            print("Canonical POS: \u03A0 M",  [int(maxterm, 2)for maxterm in binaryMXT])
+            #print("Canonical POS expression: ", CPOS )
+
+
     
     #elif choice == 3:
 

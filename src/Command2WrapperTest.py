@@ -19,9 +19,21 @@ def getMaxtermsFromTT(boolList): # Produces a list of maxterms when given a list
     maxterms = [i for i, value in enumerate(boolList) if ~value]
     return maxterms
 
-def convertToBinary(decimalArray):
-    binaryArray = [bin(num)[2:] for num in decimalArray]
-    return binaryArray
+def generate_termBLIF(minterms, maxterms, variables):
+    num_vars = len(variables)
+    #calculate Minterms
+    minterms = sorted(set(minterms))
+    binaryMNT = []
+    for minterm in minterms:
+        binary_minterm = format(minterm, '0b').zfill(len(variables))
+        binaryMNT.append(binary_minterm)
+    
+    binaryMXT = []
+    for maxterm in maxterms: 
+        binary_minterm = format(maxterm, '0b').zfill(len(variables))
+        binaryMXT.append(binary_minterm)  
+        
+    return binaryMNT, binaryMXT
 
 def main():
     print(f"You chose option 2, command 1. Performing function for Digital Combination Logic Circuit.")
@@ -84,7 +96,7 @@ def main():
                 else:
                     print("No input names found in the text.")
                     
-            elif lineNum >= 6: # Line 3 has number of outputs
+            elif lineNum >= 6: # Line 6 + has table outputs
                 inputIndex = 0
                 for i in range(numOutputs):
                     if (int(line[9 + i])):
@@ -93,14 +105,16 @@ def main():
             lineNum = lineNum + 1
             index = index + 1
 
-    testIndex = 0 #REMOVE AFTER TEST
-    minT = getMintermsFromTT(outputArray[testIndex])
-    maxT = getMaxtermsFromTT(outputArray[testIndex])
-    variableArray = outputArray[testIndex]
-
-    print(minT)
-    print (type(minT))
-    print(maxT)
+    # LOOP TO GET TO ALL INPUTS
+    for index, row in enumerate(variableArray):
+        # Code that repeats for each varaible below
+        print(f"{row} minterms:")
+        minT = getMintermsFromTT(outputArray[index])
+        print(minT)
+        print(f"{row} maxterms:")
+        maxT = getMaxtermsFromTT(outputArray[index])
+        print(maxT)
+        print(index)
 
     #Clean up files
     os.remove(outputFilename)
