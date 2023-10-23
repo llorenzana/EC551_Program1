@@ -159,17 +159,7 @@ def perform_main_option_2(choice):
             lineNum = lineNum + 1
             index = index + 1
 
-    testIndex = 0 #REMOVE AFTER TEST
-    minT = getMintermsFromTT(outputArray[testIndex])
-    maxT = getMaxtermsFromTT(outputArray[testIndex])
-
-    print(minT)
-    print (type(minT))
-    print(maxT)
-
-    #minterms, expandMin, maxterms, expandMax = generate_term(minT, variableArray)
-
-    if choice == 1:
+    if choice == 1: #NOT DONE
         for index, row in enumerate(variableArray):
             # Code that repeats for each varaible below
             minT = getMintermsFromTT(outputArray[index])
@@ -180,7 +170,7 @@ def perform_main_option_2(choice):
             print("Canonical SOP: \u03A3 m",  [int(minterm, 2) for minterm in binaryMNT])
             #print("canonical SOP: ", expandMin, "")
 
-    elif choice == 2: 
+    elif choice == 2: #NOT DONE
         for index, row in enumerate(variableArray):
             # Code that repeats for each varaible below
             minT = getMintermsFromTT(outputArray[index])
@@ -191,11 +181,24 @@ def perform_main_option_2(choice):
             print("Canonical POS: \u03A0 M",  [int(maxterm, 2)for maxterm in binaryMXT])
             #print("Canonical POS expression: ", CPOS )
 
+    elif choice == 3:
+        for index, row in enumerate(variableArray):
+            # Code that repeats for each varaible below
+            minT = getMintermsFromTT(outputArray[index])
+            maxT = getMaxtermsFromTT(outputArray[index])
+            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, variableArray)
 
-    
-    #elif choice == 3:
+            print(f"{row} Inverse as a Canonical SOP: (", calculate_inverse_SOP(binaryMXT, variableArray), ")")
+        
 
-    #elif choice == 4: 
+    elif choice == 4: 
+        for index, row in enumerate(variableArray):
+            # Code that repeats for each varaible below
+            minT = getMintermsFromTT(outputArray[index])
+            maxT = getMaxtermsFromTT(outputArray[index])
+            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, variableArray)
+
+            print(f"{row} Inverse as a Canonical POS: (", calculate_inverse_POS(binaryMNT, variableArray), ")")
 
     #elif choice == 5: 
     
