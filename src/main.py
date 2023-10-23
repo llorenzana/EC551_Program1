@@ -1,4 +1,5 @@
 import os
+import re
 import numpy as np  
 from itertools import product, combinations
 from sympy.logic.boolalg import to_cnf, to_dnf,  simplify_logic
@@ -10,17 +11,59 @@ from blif_to_tt import blif_file_to_tt_file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
+def generate_term(minterms, variables):
+    num_vars = len(variables)
+    #calculate Minterms
+    minterms = sorted(set(minterms))
+    expressions = []
+    
+    for minterm in minterms:
+        binary_minterm = format(minterm, '0b').zfill(len(variables))
+        expression = ""
+        for i, bit in enumerate(binary_minterm):
+            if bit == '0':
+                expression += f"~{variables[i]} & "
+            elif bit == '1':
+                expression += f"{variables[i]} & "
+        expressions.append(expression[:-2])
+    
+    #maxterms
+    all_values = list(range(2 ** num_vars - 1, -1 , -1))
+    remaining_values = [value for value in all_values if value not in minterms]
+    maxterms = []
+    
+    # Convert each maxterm to a boolean expression
+    for maxT in remaining_values:
+        binary_maxterm = format(maxT, '0b').zfill(num_vars)
+
+        # Create a boolean expression for the minterm
+        maxterm = ""
+        for i, bit in enumerate(binary_maxterm):
+            if bit == '0':
+                maxterm += f"{variables[i]} + "
+            elif bit == '1':
+                maxterm += f"~{variables[i]} + "
+
+        # Remove the trailing "|"
+        maxterms.append(maxterm[:-2])
+    
+    return expressions, ("  |  ".join(expressions)) , maxterms , ( "  &  ".join(maxterms))
+
 def getMintermsFromTT(boolList): # Produces a list of minterms when given a list
     # Create a list of indices where the value is True
     minterms = [i for i, value in enumerate(boolList) if value]
-    print(minterms)
+    minterms = convertToBinary(minterms)
     return minterms
 
-def getMaxtermsFromTT(boolList): # Produces a list of minterms when given a list
-    # Create a list of indices where the value is True
+def getMaxtermsFromTT(boolList): # Produces a list of maxterms when given a list
+    # Create a list of indices where the value is False
     maxterms = [i for i, value in enumerate(boolList) if ~value]
-    print(maxterms)
+    maxterms = convertToBinary(maxterms)
     return maxterms
+
+def convertToBinary(decimalArray):
+    binaryArray = [bin(num)[2:] for num in decimalArray]
+    return binaryArray
 
 def perform_main_option_1(choice):
     print(f"You chose option 1, command {choice}. Performing function for Boolean Algebraic Function - MIN SOP.")
@@ -91,25 +134,26 @@ def perform_main_option_2(choice):
 
     # Get and error check user choice (DOES NOT CHECK IF FILE IS BLIF)
     while True:
-        choice = int(input("Enter your selection: "))
+        fileChoice = int(input("Enter your selection: "))
 
         #Error check user choice
-        choice = choice - 1 #Set choice to python indexing
+        fileChoice = fileChoice - 1 #Set choice to python indexing
 
-        if (choice >= 0 and choice < len(files)):
+        if (fileChoice >= 0 and fileChoice < len(files)):
             break
         else:
             print("Please select a valid file.")
 
     # Get the truth table for the selected file
-    filename = "blif/" + files[choice]
-    outputFilename = files[choice] + ".text"
+    filename = "blif/" + files[fileChoice]
+    outputFilename = files[fileChoice] + ".text"
     blif_file_to_tt_file(filename, outputFilename)
 
     # Declare variables needed for parsing
     outputArray = None
     numInputs = None
     numOutputs = None
+    variableArray = None
 
     # Parse the file
     with open(outputFilename, 'r') as file:
@@ -124,6 +168,16 @@ def perform_main_option_2(choice):
                 numOutputs = int(line[17:-1])
                 outputArray = np.zeros((numOutputs, pow(2, numInputs)), dtype=bool) # Each row represents an output, columns represent minterms for that input
                 mintermArray = np.full((numOutputs, pow(2, numInputs)), None, dtype=object) # Will fill with minterms for each output
+            elif lineNum == 4: # Line 4 has variable names
+                pattern = r"Input names: \[([^\]]+)\]"
+                match = re.search(pattern, line)
+
+                if match:
+                    # Extract and split the names, remove single quotes, and store them in an array
+                    variableArray = [name.strip(" '") for name in match.group(1).split(', ')]
+                else:
+                    print("No input names found in the text.")
+                    
             elif lineNum >= 6: # Line 3 has number of outputs
                 inputIndex = 0
                 for i in range(numOutputs):
@@ -132,11 +186,16 @@ def perform_main_option_2(choice):
                     inputIndex = inputIndex + 1
             lineNum = lineNum + 1
             index = index + 1
-            
-    # Clean up files
-    os.remove(outputFilename)
 
-    #if choice == 1: 
+    testArray = 0 #REMOVE AFTER TEST
+    minT = getMintermsFromTT(outputArray[testArray])
+    maxT = getMaxtermsFromTT(outputArray[testArray])
+
+    minterms, expandMin, maxterms, expandMax = generate_term(minT, variableArray)
+    
+    if (choice == 1):
+        print("Canonical SOP: \u03A3 m",  [int(minterm, 2) for minterm in minT])
+        print("canonical SOP: ", expandMin, "")
 
     #elif choice == 2: 
     
@@ -158,8 +217,11 @@ def perform_main_option_2(choice):
     
     #elif choice == 11:  
     
-    #else:
-        
+    else:
+        print("Break") 
+    
+    # Clean up files
+    os.remove(outputFilename)
 ##functions: 
 
 ##general initizalization - commadn 1 and 2 plus output used in other commands 
