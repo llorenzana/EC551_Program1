@@ -1,4 +1,6 @@
 import os
+import re
+import numpy as np  
 
 from blif_to_tt import blif_file_to_tt_file
 
@@ -38,14 +40,42 @@ def main():
 
     # PARSE the output file
     # Open a file in read mode ('r')
-    with open(outputFilename, 'r') as file:
-        for line in file:
-            # if ()
-            print(line, end='')
 
+    # Declare variables needed for parsing
+    outputArray = None
+    numInputs = None
+    numOutputs = None
+
+    with open(outputFilename, 'r') as file:
+        
+        lineNum = 1 # track line number for parsing
+        index = -5 # track the minterm currently being evaluated
+
+        for line in file:
+            # Print out the line for debugging 
+            print(line, end='')
+            
+            if lineNum == 2: # Line 2 has number of inputs
+                numInputs = int(line[-2])
+            elif lineNum == 3: # Line 3 has number of outputs
+                numOutputs = pow(2, int(line[-2]))
+                outputArray = np.zeros((numInputs, numOutputs), dtype=bool) # Each row represents an input, columns represent minterms for that input
+            elif lineNum >= 6: # Line 3 has number of outputs
+                inputIndex = 0
+                for i in range(numInputs):
+                    if (int(line[9 + i])):
+                        outputArray[inputIndex][index] = True
+                        print(inputIndex, index)
+                        print(outputArray[inputIndex][index])
+                        inputIndex = inputIndex + 1
+            else:
+                print('We do not care about this line.')
+            lineNum = lineNum + 1
+            index = index + 1
+    
+    print(outputArray)
     #Clean up files
     # os.remove(outputFilename)
 
 if __name__ == "__main__":
     main()
-
