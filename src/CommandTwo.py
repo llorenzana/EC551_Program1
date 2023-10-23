@@ -40,4 +40,8 @@ def generate_term(minterms, variables):
 mint = input("Enter the Sum of Product Terms: ")
 v_in = input("Enter input variables separated by a space: ")
 minterms, expandMin, maxterms, expandMax = generate_term(list(map(int, mint.split())), v_in.split())
+
+print(minterms)
+print(maxterms)
+
 print("Canonical POS expression: ", expandMax )

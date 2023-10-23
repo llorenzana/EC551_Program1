@@ -52,13 +52,11 @@ def generate_term(minterms, variables):
 def getMintermsFromTT(boolList): # Produces a list of minterms when given a list
     # Create a list of indices where the value is True
     minterms = [i for i, value in enumerate(boolList) if value]
-    minterms = convertToBinary(minterms)
     return minterms
 
 def getMaxtermsFromTT(boolList): # Produces a list of maxterms when given a list
     # Create a list of indices where the value is False
     maxterms = [i for i, value in enumerate(boolList) if ~value]
-    maxterms = convertToBinary(maxterms)
     return maxterms
 
 def convertToBinary(decimalArray):
@@ -187,15 +185,20 @@ def perform_main_option_2(choice):
             lineNum = lineNum + 1
             index = index + 1
 
-    testArray = 0 #REMOVE AFTER TEST
-    minT = getMintermsFromTT(outputArray[testArray])
-    maxT = getMaxtermsFromTT(outputArray[testArray])
+    testIndex = 0 #REMOVE AFTER TEST
+    minT = getMintermsFromTT(outputArray[testIndex])
+    maxT = getMaxtermsFromTT(outputArray[testIndex])
+    variableArray = outputArray[testIndex]
+
+    print(minT)
+    print (type(minT))
+    print(maxT)
 
     minterms, expandMin, maxterms, expandMax = generate_term(minT, variableArray)
-    
+
     if (choice == 1):
         print("Canonical SOP: \u03A3 m",  [int(minterm, 2) for minterm in minT])
-        print("canonical SOP: ", expandMin, "")
+        #print("canonical SOP: ", expandMin, "")
 
     #elif choice == 2: 
     

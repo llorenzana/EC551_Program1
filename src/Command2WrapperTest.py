@@ -9,30 +9,23 @@ from blif_to_tt import blif_file_to_tt_file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
-def convertToBinary(decimalArray):
-    size = len(bin(decimalArray[-1]))-2
-    groups = {},set()
-
-    for minterm in decimalArray:
-        try:
-            groups[bin(minterm).count('1')].append(bin(minterm)[2:].zfill(size))
-        except KeyError:
-            groups[bin(minterm).count('1')] = [bin(minterm)[2:].zfill(size)]
-    return groups
-
-def getMinterms(boolList): # Produces a list of minterms when given a list
+def getMintermsFromTT(boolList): # Produces a list of minterms when given a list
     # Create a list of indices where the value is True
     minterms = [i for i, value in enumerate(boolList) if value]
-    print(minterms)
     return minterms
 
-def getMaxtermsFromTT(boolList): # Produces a list of minterms when given a list
-    # Create a list of indices where the value is True
+def getMaxtermsFromTT(boolList): # Produces a list of maxterms when given a list
+    # Create a list of indices where the value is False
     maxterms = [i for i, value in enumerate(boolList) if ~value]
-    print(maxterms)
     return maxterms
 
+def convertToBinary(decimalArray):
+    binaryArray = [bin(num)[2:] for num in decimalArray]
+    return binaryArray
+
 def main():
+    print(f"You chose option 2, command 1. Performing function for Digital Combination Logic Circuit.")
+
     # Specify the directory path
     folder_path = "blif"
 
@@ -47,25 +40,26 @@ def main():
 
     # Get and error check user choice (DOES NOT CHECK IF FILE IS BLIF)
     while True:
-        choice = int(input("Enter your selection: "))
+        fileChoice = int(input("Enter your selection: "))
 
         #Error check user choice
-        choice = choice - 1 #Set choice to python indexing
+        fileChoice = fileChoice - 1 #Set choice to python indexing
 
-        if (choice >= 0 and choice < len(files)):
+        if (fileChoice >= 0 and fileChoice < len(files)):
             break
         else:
             print("Please select a valid file.")
 
     # Get the truth table for the selected file
-    filename = "blif/" + files[choice]
-    outputFilename = files[choice] + ".text"
+    filename = "blif/" + files[fileChoice]
+    outputFilename = files[fileChoice] + ".text"
     blif_file_to_tt_file(filename, outputFilename)
 
     # Declare variables needed for parsing
     outputArray = None
     numInputs = None
     numOutputs = None
+    variableArray = None
 
     # Parse the file
     with open(outputFilename, 'r') as file:
@@ -80,6 +74,16 @@ def main():
                 numOutputs = int(line[17:-1])
                 outputArray = np.zeros((numOutputs, pow(2, numInputs)), dtype=bool) # Each row represents an output, columns represent minterms for that input
                 mintermArray = np.full((numOutputs, pow(2, numInputs)), None, dtype=object) # Will fill with minterms for each output
+            elif lineNum == 4: # Line 4 has variable names
+                pattern = r"Input names: \[([^\]]+)\]"
+                match = re.search(pattern, line)
+
+                if match:
+                    # Extract and split the names, remove single quotes, and store them in an array
+                    variableArray = [name.strip(" '") for name in match.group(1).split(', ')]
+                else:
+                    print("No input names found in the text.")
+                    
             elif lineNum >= 6: # Line 3 has number of outputs
                 inputIndex = 0
                 for i in range(numOutputs):
@@ -88,11 +92,15 @@ def main():
                     inputIndex = inputIndex + 1
             lineNum = lineNum + 1
             index = index + 1
-    
-    # Use the arrays to get the minterms //TEST
-    testArray = 1
-    print(outputArray[testArray])
-    print(convertToBinary(mintermArray))
+
+    testIndex = 0 #REMOVE AFTER TEST
+    minT = getMintermsFromTT(outputArray[testIndex])
+    maxT = getMaxtermsFromTT(outputArray[testIndex])
+    variableArray = outputArray[testIndex]
+
+    print(minT)
+    print (type(minT))
+    print(maxT)
 
     #Clean up files
     os.remove(outputFilename)
