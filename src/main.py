@@ -11,6 +11,26 @@ from blif_to_tt import blif_file_to_tt_file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
+def printTT(terms, numInputs):
+    output = False
+
+    # Generate all possible combinations of inputs
+    inputsBinary = list(product([0, 1], repeat=numInputs))
+
+    # Create the header of the truth table
+    header = [f'Input_{i}' for i in range(numInputs)] + ['Output']
+
+    # Print the header
+    print("\t".join(header))
+
+    # Evaluate minterms and create the truth table
+    for index, inputs in enumerate(inputsBinary): # Loop for each possible input combination
+        if index in terms:
+            output = True
+        row = "\t".join([str(i) for i in inputs] + [str(output)])
+        output = False
+        print(row)
+
 def generate_termBLIF(minterms, maxterms, variables):
     num_vars = len(variables)
     #calculate Minterms
@@ -112,7 +132,12 @@ def perform_main_option_1(choice):
 
     elif choice == 10: 
         print("Number of ON-Set maxterms: ", len(maxT))
-    #elif choice == 11:  
+    
+    elif choice == 11:  
+        printTT([int(minterm, 2) for minterm in minT], len(vars))
+
+    elif choice == 12:  
+        printTT([int(maxterm, 2) for maxterm in maxT], len(vars))
     
     else:
         print("Break") 
@@ -291,7 +316,7 @@ def perform_main_option_2(choice):
             # Code that repeats for each varaible below
             maxT = getMaxtermsFromTT(outputArray[index])
             print(f"{row} Number of ON-Set maxterms: ", len(maxT))
-            
+
     #elif choice == 11:  
     
     else:
@@ -525,8 +550,8 @@ def main():
             print("8. # of Essential Prime Implcants ")
             print("9. # of ON-Set Minterms")
             print("10. # Of ON-Set Maxterms ")
-            print("11. ")
-            print("12. \n")
+            print("11. Truth Table")
+            print("12. Truth Table for Inverse\n")
 
             command = int(input("Enter your command: "))
 
@@ -547,4 +572,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

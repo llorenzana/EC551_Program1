@@ -9,6 +9,51 @@ from blif_to_tt import blif_file_to_tt_file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
+# OUTPUT BELOW THIS LINE
+def printTTMultiOutput(terms, numInputs, outputArray):
+    #Declare vars for correct scope
+    output = False
+
+    # Generate all possible combinations of inputs
+    inputsBinary = list(product([0, 1], repeat=numInputs))
+
+    # Create the header of the truth table
+    header = [f'Input_{i}' for i in range(numInputs)] + ['Output']
+
+    # Print the header
+    print("\t".join(header))
+
+    # Evaluate minterms and create the truth table
+    for index, inputs in enumerate(inputsBinary): # Loop for each possible input combination
+        if index in terms:
+            output = True
+        row = "\t".join([str(i) for i in inputs] + [str(output)])
+        output = False
+        print(row)
+
+# Define the number of variables and minterms
+num_variables = 5  # Change this to the number of variables you have
+minterms = [0, 1, 2, 3, 5, 10]  # Change this to your list of minterms
+printTTMultiOutput(minterms, num_variables)
+
+def printTT(terms, numInputs):
+    # Generate all possible combinations of inputs
+    inputsBinary = list(product([0, 1], repeat=numInputs))
+
+    # Create the header of the truth table
+    header = [f'Input_{i}' for i in range(numInputs)] + ['Output']
+
+    # Print the header
+    print("\t".join(header))
+
+    # Evaluate minterms and create the truth table
+    for index, inputs in enumerate(inputsBinary): # Loop for each possible input combination
+        if index in terms:
+            output = True
+        row = "\t".join([str(i) for i in inputs] + [str(output)])
+        output = False
+        print(row)
+        
 def getMintermsFromTT(boolList): # Produces a list of minterms when given a list
     # Create a list of indices where the value is True
     minterms = [i for i, value in enumerate(boolList) if value]
