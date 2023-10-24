@@ -13,6 +13,15 @@ Boolean Algebra SOP
 [Functions](#Functions)  
 [References](#References)  
 
+# Organziation  
+The majority of our code is within the 'src' folder.
+``main.py`` stores the main function for the program. Additionally, this folder contains ``blif_to_tt.py``, which is code used to aid in the graph BLIF input. Finally, the folder contains the subfolder 'src/blif', which contains the test BLIF files.
+
+We have included the files we used to test out our functions in the 'testFunctions' folder. 
+
+# Functions  
+The functions for this program are broken down below based on the input method chosen.
+
 ## Boolean Algebra SOP: 
 ### Overview 
 In this, the program will take in a SOP Function and return one of the 12 commands. It initializes with a BooleanFunction class in which it takes the command line input, parses the SOP equation and produces:
@@ -169,7 +178,7 @@ print("Number of ON-Set minterms: ", len(maxT))
 **Command 12:**
 * 
 
-### Functions  
+
 
 ### 
 ### References  

@@ -1,10 +1,12 @@
 import os
 import re
 import numpy as np  
+
 from itertools import product, combinations
 from sympy.logic.boolalg import to_cnf, to_dnf,  simplify_logic
 from sympy.abc import symbols
 from sympy import Or, And
+
 from blif_to_tt import blif_file_to_tt_file
 
 # Change the working directory to the directory where your script is located
