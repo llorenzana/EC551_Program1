@@ -11,6 +11,48 @@ from blif_to_tt import blif_file_to_tt_file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
+def generate_termBLIF(minterms, maxterms, variables):
+    num_vars = len(variables)
+    #calculate Minterms
+    minterms = sorted(set(minterms))
+    
+    binaryMNT = []
+    expanded_sum_of_minterms = []
+    
+    for minterm in minterms:
+        binary_minterm = format(minterm, '0b').zfill(len(variables))
+        binaryMNT.append(binary_minterm)
+        term = ""
+        for i, value in enumerate(binary_minterm):
+            if value == '0':
+                term += f"~{variables[i]} & "
+            elif value == '1':
+                term += f"{variables[i]} & "
+                
+        # Remove the trailing "&"
+        term = term[:-2]
+        expanded_sum_of_minterms.append(term)
+
+    binaryMXT = []
+    expanded_POS_Maxterms= []
+    # Convert each maxterm to a boolean expression
+    for maxT in maxterms:
+        binary_maxterm = format(maxT, '0b').zfill(num_vars)
+        binaryMXT.append(binary_minterm)
+        # Create a boolean expression for the minterm
+        maxterm = ""
+        for i, bit in enumerate(binary_maxterm):
+            if bit == '0':
+                maxterm += f"{variables[i]} | "
+            elif bit == '1':
+                maxterm += f"~{variables[i]} | "
+
+        # Remove the trailing "|"
+        expanded_POS_Maxterms.append(maxterm[:-2])
+
+    
+    return binaryMNT, (" | ".join(expanded_sum_of_minterms)) , binaryMXT , ( " & ".join(expanded_POS_Maxterms))
+
 def getMintermsFromTT(boolList): # Produces a list of minterms when given a list
     # Create a list of indices where the value is True
     minterms = [i for i, value in enumerate(boolList) if value]
@@ -20,22 +62,6 @@ def getMaxtermsFromTT(boolList): # Produces a list of maxterms when given a list
     # Create a list of indices where the value is False
     maxterms = [i for i, value in enumerate(boolList) if ~value]
     return maxterms
-
-def generate_termBLIF(minterms, maxterms, variables):
-    num_vars = len(variables)
-    #calculate Minterms
-    minterms = sorted(set(minterms))
-    binaryMNT = []
-    for minterm in minterms:
-        binary_minterm = format(minterm, '0b').zfill(len(variables))
-        binaryMNT.append(binary_minterm)
-    
-    binaryMXT = []
-    for maxterm in maxterms: 
-        binary_minterm = format(maxterm, '0b').zfill(len(variables))
-        binaryMXT.append(binary_minterm)  
-        
-    return binaryMNT, binaryMXT
 
 def perform_main_option_1(choice):
     print(f"You chose option 1, command {choice}. Performing function for Boolean Algebraic Function - MIN SOP.")
@@ -82,6 +108,8 @@ def perform_main_option_1(choice):
 
     elif choice == 9:
         print("Number of ON-Set minterms: ", len(minT))
+
+
     elif choice == 10: 
         print("Number of ON-Set maxterms: ", len(maxT))
     #elif choice == 11:  
@@ -168,36 +196,34 @@ def perform_main_option_2(choice):
             lineNum = lineNum + 1
             index = index + 1
 
-    if choice == 1: #NOT DONE
-        print(outputVariableArray)
-        print(enumerate(outputVariableArray))
+    if choice == 1:
         for index, row in enumerate(outputVariableArray):
             # Code that repeats for each varaible below
             minT = getMintermsFromTT(outputArray[index])
             maxT = getMaxtermsFromTT(outputArray[index])
-            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, inputVariableArray)
+            _, expand_minT, _, _ = generate_termBLIF(minT, maxT, inputVariableArray)
 
             print(f"{row} minterms:")
-            print("Canonical SOP: \u03A3 m",  [int(minterm, 2) for minterm in binaryMNT])
-            #print("canonical SOP: ", expandMin, "")
+            print("Canonical SOP: \u03A3 m", minT)
+            print("canonical SOP: ", expand_minT)
 
-    elif choice == 2: #NOT DONE
+    elif choice == 2:
         for index, row in enumerate(outputVariableArray):
             # Code that repeats for each varaible below
             minT = getMintermsFromTT(outputArray[index])
             maxT = getMaxtermsFromTT(outputArray[index])
-            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, inputVariableArray)
+            _, _, _, expand_maxT = generate_termBLIF(minT, maxT, inputVariableArray)
 
             print(f"{row} maxterms:")
-            print("Canonical POS: \u03A0 M",  [int(maxterm, 2)for maxterm in binaryMXT])
-            #print("Canonical POS expression: ", CPOS )
+            print("Canonical POS: \u03A0 M",  maxT)
+            print("Canonical POS expression: ", expand_maxT)
 
     elif choice == 3:
         for index, row in enumerate(outputVariableArray):
             # Code that repeats for each varaible below
             minT = getMintermsFromTT(outputArray[index])
             maxT = getMaxtermsFromTT(outputArray[index])
-            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, inputVariableArray)
+            _, _, binaryMXT, _ = generate_termBLIF(minT, maxT, inputVariableArray)
 
             print(f"{row} Inverse as a Canonical SOP: (", calculate_inverse_SOP(binaryMXT, inputVariableArray), ")")
         
@@ -207,31 +233,65 @@ def perform_main_option_2(choice):
             # Code that repeats for each varaible below
             minT = getMintermsFromTT(outputArray[index])
             maxT = getMaxtermsFromTT(outputArray[index])
-            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, inputVariableArray)
+            binaryMNT, _, _, _ = generate_termBLIF(minT, maxT, inputVariableArray)
 
             print(f"{row} Inverse as a Canonical POS: (", calculate_inverse_POS(binaryMNT, inputVariableArray), ")")
 
-    #elif choice == 5: 
+    elif choice == 5:
+        for index, row in enumerate(outputVariableArray):
+            # Code that repeats for each varaible below
+            minT = getMintermsFromTT(outputArray[index])
+            maxT = getMaxtermsFromTT(outputArray[index])
+            _, expand_minT, _, _ = generate_termBLIF(minT, maxT, inputVariableArray)
+
+            minSOP = to_dnf(expand_minT, simplify=True, force=True)
+            print(f"{row} Reduced Literals as SOP: ", minSOP)
+            print(f"{row} Saved Number of literals: ", countLiterals(minT, str(minSOP) , inputVariableArray))
     
-    #elif choice == 6: 
+    elif choice == 6: 
+        for index, row in enumerate(outputVariableArray):
+            # Code that repeats for each varaible below
+            minT = getMintermsFromTT(outputArray[index])
+            maxT = getMaxtermsFromTT(outputArray[index])
+            _, _, _, expand_maxT = generate_termBLIF(minT, maxT, inputVariableArray)
+
+            minPOS = to_cnf(expand_maxT, simplify= True, force=True)
+            print(f"{row} Reduced Literals as POS: ", minPOS)
+            print(f"{row} saved number of literals: ", countLiterals(maxT, str(minPOS) , inputVariableArray))
+
     
     elif choice == 7:
         for index, row in enumerate(outputVariableArray):
             # Code that repeats for each varaible below
             minT = getMintermsFromTT(outputArray[index])
             maxT = getMaxtermsFromTT(outputArray[index])
-            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, inputVariableArray)
+            binaryMNT, _, _, _ = generate_termBLIF(minT, maxT, inputVariableArray)
 
-            PI, _ =  countPI_EPI([int(minterm, 2) for minterm in binaryMNT])
+            PI, _ =  countPI_EPI(minT)
             print(f"{row} Number of Prime Implicants:", len(PI))
+    
+    elif choice == 8:
+        for index, row in enumerate(outputVariableArray):
+            # Code that repeats for each varaible below
+            minT = getMintermsFromTT(outputArray[index])
+            maxT = getMaxtermsFromTT(outputArray[index])
+            binaryMNT, expand_minT, binaryMXT, expand_maxT = generate_termBLIF(minT, maxT, inputVariableArray)
 
+            _, EPI =  countPI_EPI(minT)
+            print(f"{row} Number of Essential Prime Implicants:", len(EPI))
     
-    #elif choice == 8:
+    elif choice == 9:
+        for index, row in enumerate(outputVariableArray):
+            # Code that repeats for each varaible below
+            minT = getMintermsFromTT(outputArray[index])
+            print(f"{row} Number of ON-Set minterms: ", len(minT))
     
-    #elif choice == 9:
-    
-    #elif choice == 10: 
-    
+    elif choice == 10: 
+        for index, row in enumerate(outputVariableArray):
+            # Code that repeats for each varaible below
+            maxT = getMaxtermsFromTT(outputArray[index])
+            print(f"{row} Number of ON-Set maxterms: ", len(maxT))
+            
     #elif choice == 11:  
     
     else:
@@ -481,7 +541,7 @@ def main():
             print("Invalid choice. Please enter a valid main option.")
 
         another_command = input("Do you want to perform another command? (yes/no): ")
-        if another_command.lower() != 'yes':
+        if another_command.lower() not in ('yes', 'y', 'certainly', 'indeed'):
             print("Thanks for using our program. Goodbye!")
             break
 
