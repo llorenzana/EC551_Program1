@@ -11,6 +11,32 @@ from blif_to_tt import blif_file_to_tt_file
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
+def printTTMultiOutput(outputArray, inputVariableArray, outputVariableArray, isInverse):
+    #Declare vars for correct
+    output = False
+
+    # Generate all possible combinations of inputs
+    inputsBinary = list(product([0, 1], repeat=len(inputVariableArray)))
+
+    # Create the header of the truth table
+    header = [f'{input_variable}' for input_variable in inputVariableArray] + [f'out_{output_variable}' for output_variable in outputVariableArray]
+
+    # Print the header
+    print("\t".join(header))
+
+    # Evaluate minterms and create the truth table
+    for index, inputsBinary in enumerate(inputsBinary): # Loop for each possible input combination
+        row = "\t".join([str(i) for i in inputsBinary])
+
+        for outputIndex, output_variable in enumerate(outputVariableArray):
+            if isInverse:
+                row += "\t" + str(~outputArray[outputIndex][index])
+            else:
+                row += "\t" + str(outputArray[outputIndex][index])
+                                
+        output = False
+        print(row)
+
 def printTT(terms, numInputs):
     output = False
 
@@ -193,7 +219,6 @@ def perform_main_option_2(choice):
             elif lineNum == 3: # Line 3 has number of outputs
                 numOutputs = int(line[17:-1])
                 outputArray = np.zeros((numOutputs, pow(2, numInputs)), dtype=bool) # Each row represents an output, columns represent minterms for that input
-                mintermArray = np.full((numOutputs, pow(2, numInputs)), None, dtype=object) # Will fill with minterms for each output
             elif lineNum == 4: # Line 4 has input variable names
                 pattern = r"Input names: \[([^\]]+)\]"
                 match = re.search(pattern, line)
@@ -317,7 +342,11 @@ def perform_main_option_2(choice):
             maxT = getMaxtermsFromTT(outputArray[index])
             print(f"{row} Number of ON-Set maxterms: ", len(maxT))
 
-    #elif choice == 11:  
+    elif choice == 11: 
+        printTTMultiOutput(outputArray, inputVariableArray, outputVariableArray, 0)
+
+    elif choice == 12: 
+        printTTMultiOutput(outputArray, inputVariableArray, outputVariableArray, 1)
     
     else:
         print("Break") 

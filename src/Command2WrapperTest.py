@@ -10,31 +10,31 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
 # OUTPUT BELOW THIS LINE
-def printTTMultiOutput(terms, numInputs, outputArray):
-    #Declare vars for correct scope
+def printTTMultiOutput(outputArray, inputVariableArray, outputVariableArray, isInverse):
+    #Declare vars for correct
     output = False
 
     # Generate all possible combinations of inputs
-    inputsBinary = list(product([0, 1], repeat=numInputs))
+    inputsBinary = list(product([0, 1], repeat=len(inputVariableArray)))
 
     # Create the header of the truth table
-    header = [f'Input_{i}' for i in range(numInputs)] + ['Output']
+    header = [f'{input_variable}' for input_variable in inputVariableArray] + [f'out_{output_variable}' for output_variable in outputVariableArray]
 
     # Print the header
     print("\t".join(header))
 
     # Evaluate minterms and create the truth table
-    for index, inputs in enumerate(inputsBinary): # Loop for each possible input combination
-        if index in terms:
-            output = True
-        row = "\t".join([str(i) for i in inputs] + [str(output)])
+    for index, inputsBinary in enumerate(inputsBinary): # Loop for each possible input combination
+        row = "\t".join([str(i) for i in inputsBinary])
+
+        for outputIndex, output_variable in enumerate(outputVariableArray):
+            if isInverse:
+                row += "\t" + str(~outputArray[outputIndex][index])
+            else:
+                row += "\t" + str(outputArray[outputIndex][index])
+                                
         output = False
         print(row)
-
-# Define the number of variables and minterms
-num_variables = 5  # Change this to the number of variables you have
-minterms = [0, 1, 2, 3, 5, 10]  # Change this to your list of minterms
-printTTMultiOutput(minterms, num_variables)
 
 def printTT(terms, numInputs):
     # Generate all possible combinations of inputs
@@ -116,7 +116,8 @@ def main():
     outputArray = None
     numInputs = None
     numOutputs = None
-    variableArray = None
+    inputVariableArray = None
+    outputVariableArray = None
 
     # Parse the file
     with open(outputFilename, 'r') as file:
@@ -131,17 +132,25 @@ def main():
                 numOutputs = int(line[17:-1])
                 outputArray = np.zeros((numOutputs, pow(2, numInputs)), dtype=bool) # Each row represents an output, columns represent minterms for that input
                 mintermArray = np.full((numOutputs, pow(2, numInputs)), None, dtype=object) # Will fill with minterms for each output
-            elif lineNum == 4: # Line 4 has variable names
+            elif lineNum == 4: # Line 4 has input variable names
                 pattern = r"Input names: \[([^\]]+)\]"
                 match = re.search(pattern, line)
 
                 if match:
                     # Extract and split the names, remove single quotes, and store them in an array
-                    variableArray = [name.strip(" '") for name in match.group(1).split(', ')]
+                    inputVariableArray = [name.strip(" '") for name in match.group(1).split(', ')]
                 else:
                     print("No input names found in the text.")
-                    
-            elif lineNum >= 6: # Line 6 + has table outputs
+            elif lineNum == 5: # Line 5 has output variable names
+                pattern = r"Output names: \[([^\]]+)\]"
+                match = re.search(pattern, line)
+
+                if match:
+                    # Extract and split the names, remove single quotes, and store them in an array
+                    outputVariableArray = [name.strip(" '") for name in match.group(1).split(', ')]
+                else:
+                    print("No input names found in the text.")                    
+            elif lineNum >= 6: # Line 3 has number of outputs
                 inputIndex = 0
                 for i in range(numOutputs):
                     if (int(line[9 + i])):
@@ -151,15 +160,8 @@ def main():
             index = index + 1
 
     # LOOP TO GET TO ALL INPUTS
-    for index, row in enumerate(variableArray):
-        # Code that repeats for each varaible below
-        print(f"{row} minterms:")
-        minT = getMintermsFromTT(outputArray[index])
-        print(minT)
-        print(f"{row} maxterms:")
-        maxT = getMaxtermsFromTT(outputArray[index])
-        print(maxT)
-        print(index)
+    print(outputArray)
+    printTTMultiOutput(outputArray, inputVariableArray, outputVariableArray, 0)
 
     #Clean up files
     os.remove(outputFilename)
