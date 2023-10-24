@@ -99,6 +99,7 @@ print("Number of ON-Set minterms: ", len(maxT))
 
 ### Testcases: 
 4-input: 
+    
     (A & ~B) | (~C & D) | (~A & B & C) | (~A & B & ~C)
     
     (A & ~B & C) | (~A & B & D) | (~A & ~C & D) | (A & ~B & ~D)
@@ -106,6 +107,7 @@ print("Number of ON-Set minterms: ", len(maxT))
     (A & B) | (~B & C & D) | (~A & ~C & D) | (~A & B & ~C) | (~A & ~B & C)
 
 5-input:
+    
     (A & B & ~C) | (~B & C & D) | (A & ~C & ~F)
     
     (A & B & ~C) | (~B & C & D) | (~A & ~C & F) | (A & ~B & ~D) | (~A & B & ~F)
