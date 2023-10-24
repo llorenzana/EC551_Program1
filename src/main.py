@@ -125,7 +125,8 @@ def perform_main_option_2(choice):
     outputArray = None
     numInputs = None
     numOutputs = None
-    variableArray = None
+    inputVariableArray = None
+    outputVariableArray = None
 
     # Parse the file
     with open(outputFilename, 'r') as file:
@@ -140,16 +141,24 @@ def perform_main_option_2(choice):
                 numOutputs = int(line[17:-1])
                 outputArray = np.zeros((numOutputs, pow(2, numInputs)), dtype=bool) # Each row represents an output, columns represent minterms for that input
                 mintermArray = np.full((numOutputs, pow(2, numInputs)), None, dtype=object) # Will fill with minterms for each output
-            elif lineNum == 4: # Line 4 has variable names
+            elif lineNum == 4: # Line 4 has input variable names
                 pattern = r"Input names: \[([^\]]+)\]"
                 match = re.search(pattern, line)
 
                 if match:
                     # Extract and split the names, remove single quotes, and store them in an array
-                    variableArray = [name.strip(" '") for name in match.group(1).split(', ')]
+                    inputVariableArray = [name.strip(" '") for name in match.group(1).split(', ')]
                 else:
                     print("No input names found in the text.")
-                    
+            elif lineNum == 5: # Line 5 has output variable names
+                pattern = r"Output names: \[([^\]]+)\]"
+                match = re.search(pattern, line)
+
+                if match:
+                    # Extract and split the names, remove single quotes, and store them in an array
+                    outputVariableArray = [name.strip(" '") for name in match.group(1).split(', ')]
+                else:
+                    print("No input names found in the text.")                    
             elif lineNum >= 6: # Line 3 has number of outputs
                 inputIndex = 0
                 for i in range(numOutputs):
@@ -160,51 +169,62 @@ def perform_main_option_2(choice):
             index = index + 1
 
     if choice == 1: #NOT DONE
-        for index, row in enumerate(variableArray):
+        print(outputVariableArray)
+        print(enumerate(outputVariableArray))
+        for index, row in enumerate(outputVariableArray):
             # Code that repeats for each varaible below
             minT = getMintermsFromTT(outputArray[index])
             maxT = getMaxtermsFromTT(outputArray[index])
-            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, variableArray)
+            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, inputVariableArray)
 
             print(f"{row} minterms:")
             print("Canonical SOP: \u03A3 m",  [int(minterm, 2) for minterm in binaryMNT])
             #print("canonical SOP: ", expandMin, "")
 
     elif choice == 2: #NOT DONE
-        for index, row in enumerate(variableArray):
+        for index, row in enumerate(outputVariableArray):
             # Code that repeats for each varaible below
             minT = getMintermsFromTT(outputArray[index])
             maxT = getMaxtermsFromTT(outputArray[index])
-            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, variableArray)
+            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, inputVariableArray)
 
             print(f"{row} maxterms:")
             print("Canonical POS: \u03A0 M",  [int(maxterm, 2)for maxterm in binaryMXT])
             #print("Canonical POS expression: ", CPOS )
 
     elif choice == 3:
-        for index, row in enumerate(variableArray):
+        for index, row in enumerate(outputVariableArray):
             # Code that repeats for each varaible below
             minT = getMintermsFromTT(outputArray[index])
             maxT = getMaxtermsFromTT(outputArray[index])
-            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, variableArray)
+            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, inputVariableArray)
 
-            print(f"{row} Inverse as a Canonical SOP: (", calculate_inverse_SOP(binaryMXT, variableArray), ")")
+            print(f"{row} Inverse as a Canonical SOP: (", calculate_inverse_SOP(binaryMXT, inputVariableArray), ")")
         
 
     elif choice == 4: 
-        for index, row in enumerate(variableArray):
+        for index, row in enumerate(outputVariableArray):
             # Code that repeats for each varaible below
             minT = getMintermsFromTT(outputArray[index])
             maxT = getMaxtermsFromTT(outputArray[index])
-            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, variableArray)
+            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, inputVariableArray)
 
-            print(f"{row} Inverse as a Canonical POS: (", calculate_inverse_POS(binaryMNT, variableArray), ")")
+            print(f"{row} Inverse as a Canonical POS: (", calculate_inverse_POS(binaryMNT, inputVariableArray), ")")
 
     #elif choice == 5: 
     
     #elif choice == 6: 
     
-    #elif choice == 7: 
+    elif choice == 7:
+        for index, row in enumerate(outputVariableArray):
+            # Code that repeats for each varaible below
+            minT = getMintermsFromTT(outputArray[index])
+            maxT = getMaxtermsFromTT(outputArray[index])
+            binaryMNT, binaryMXT = generate_termBLIF(minT, maxT, inputVariableArray)
+
+            PI, _ =  countPI_EPI([int(minterm, 2) for minterm in binaryMNT])
+            print(f"{row} Number of Prime Implicants:", len(PI))
+
     
     #elif choice == 8:
     
