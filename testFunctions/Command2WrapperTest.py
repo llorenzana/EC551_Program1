@@ -150,10 +150,11 @@ def main():
                     outputVariableArray = [name.strip(" '") for name in match.group(1).split(', ')]
                 else:
                     print("No input names found in the text.")                    
-            elif lineNum >= 6: # Line 3 has number of outputs
+            elif lineNum >= 6: # Line 6 start of table
                 inputIndex = 0
+                print(numOutputs)
                 for i in range(numOutputs):
-                    if (int(line[9 + i])):
+                    if (int(line[numInputs + 3 + i])):
                         outputArray[inputIndex][index] = True
                     inputIndex = inputIndex + 1
             lineNum = lineNum + 1

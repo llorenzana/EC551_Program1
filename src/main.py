@@ -239,10 +239,10 @@ def perform_main_option_2(choice):
                     outputVariableArray = [name.strip(" '") for name in match.group(1).split(', ')]
                 else:
                     print("No input names found in the text.")                    
-            elif lineNum >= 6: # Line 3 has number of outputs
+            elif lineNum >= 6: # Line 6 has start of gates
                 inputIndex = 0
                 for i in range(numOutputs):
-                    if (int(line[9 + i])):
+                    if (int(line[numInputs + 3 + i])): # outputs start 3 char after end of inputs
                         outputArray[inputIndex][index] = True
                     inputIndex = inputIndex + 1
             lineNum = lineNum + 1

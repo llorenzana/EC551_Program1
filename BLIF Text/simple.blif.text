@@ -1,0 +1,9 @@
+# File: simple.blif.text
+# Total inputs: 2
+# Total outputs: 1
+# Input names: ['a', 'b']
+# Output names: ['c']
+00 : 0
+01 : 0
+10 : 0
+11 : 1
